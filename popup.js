@@ -125,10 +125,17 @@ document.addEventListener('DOMContentLoaded', function() {
             toggleHideFeed.checked = false;
             toggleComments.checked = false;
             toggleMotivation.checked = false;
+            
+            // Store countdown start time when turning OFF
+            const countdownEndTime = Date.now() + (remainingSeconds * 1000);
+            chrome.storage.local.set({ countdownEndTime: countdownEndTime });
         } else {
             // When main toggle is ON, restore default settings
             toggleExtension.checked = true;
             toggleShorts.checked = true;  // Default: Block Shorts
+            
+            // Clear countdown when turning back ON
+            chrome.storage.local.remove('countdownEndTime');
         }
         
         // Update all states in storage
@@ -183,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    function updateMainToggleState(active) {
+    function updateMainToggleState(active, preserveCountdown = false) {
         if (active) {
             mainToggle.classList.remove('inactive');
             mainToggle.classList.add('active');
@@ -207,7 +214,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Show timer and remaining time when extension is OFF
             timer.style.display = 'block';
             remainingTime.style.display = 'block';
-            remainingSeconds = 600; // Reset to 10 minutes
+            
+            // Only reset countdown if not preserving it (i.e., when manually toggling)
+            if (!preserveCountdown) {
+                remainingSeconds = 600; // Reset to 10 minutes
+            }
+            
             const minutes = Math.floor(remainingSeconds / 60);
             const seconds = remainingSeconds % 60;
             timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -217,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Load initial states with default values on first install
-    chrome.storage.local.get(['enabled', 'hideComments', 'hideFeed', 'motivationEnabled', 'hideShorts', 'initialized'], function(result) {
+    chrome.storage.local.get(['enabled', 'hideComments', 'hideFeed', 'motivationEnabled', 'hideShorts', 'initialized', 'countdownEndTime'], function(result) {
         // Check if this is first install
         if (!result.initialized) {
             // Set default values on first install
@@ -233,7 +245,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Main toggle state
         isActive = result.enabled !== false; // Default to true
-        updateMainToggleState(isActive);
+        
+        // If extension is OFF and countdown is active, restore remaining time
+        let hasActiveCountdown = false;
+        if (!isActive && result.countdownEndTime) {
+            const now = Date.now();
+            const timeLeft = Math.max(0, Math.floor((result.countdownEndTime - now) / 1000));
+            
+            if (timeLeft > 0) {
+                // Countdown still active
+                remainingSeconds = timeLeft;
+                hasActiveCountdown = true;
+                console.log(`Countdown restored: ${remainingSeconds} seconds remaining`);
+            } else {
+                // Countdown expired while extension was closed - auto turn ON
+                console.log('Countdown expired, auto-enabling extension...');
+                isActive = true;
+                chrome.storage.local.set({ enabled: true });
+                chrome.storage.local.remove('countdownEndTime');
+            }
+        }
+        
+        updateMainToggleState(isActive, hasActiveCountdown);
 
         // Extension toggle state (Hide Recommendations)
         toggleExtension.checked = result.enabled !== false; // Default to true
