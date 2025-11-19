@@ -168,8 +168,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleShorts', hideShorts: hideShorts }, function(response) {
                         if (chrome.runtime.lastError) {
                             console.log('Error sending shorts message:', chrome.runtime.lastError);
+                        } else {
+                            console.log('Shorts toggle message sent successfully!');
                         }
                     });
+                } else {
+                    console.log('Error: No active tab found for shorts toggle');
                 }
             });
         });
