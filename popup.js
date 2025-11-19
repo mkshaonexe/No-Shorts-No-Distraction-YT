@@ -122,22 +122,42 @@ document.addEventListener('DOMContentLoaded', function() {
             motivationEnabled: false
         }, function() {
             console.log('Main toggle changed:', isActive);
-            // Notify content script
+            // Notify content script with individual messages for each feature
             chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                 if (tabs && tabs[0]) {
-                    // Send all toggle states to content script
-                    chrome.tabs.sendMessage(tabs[0].id, { 
+                    const tabId = tabs[0].id;
+                    
+                    // Send main extension toggle
+                    chrome.tabs.sendMessage(tabId, { 
                         action: 'toggleExtension', 
-                        enabled: isActive,
-                        hideShorts: isActive ? true : false,
-                        hideFeed: false,
-                        hideComments: false,
-                        motivationEnabled: false
-                    }, function(response) {
-                        if (chrome.runtime.lastError) {
-                            console.log('Error sending main toggle message:', chrome.runtime.lastError);
-                        }
+                        enabled: isActive
                     });
+                    
+                    // Send shorts toggle
+                    chrome.tabs.sendMessage(tabId, { 
+                        action: 'toggleShorts', 
+                        hideShorts: isActive ? true : false
+                    });
+                    
+                    // Send hide feed toggle
+                    chrome.tabs.sendMessage(tabId, { 
+                        action: 'toggleHideFeed', 
+                        hideFeed: false
+                    });
+                    
+                    // Send comments toggle
+                    chrome.tabs.sendMessage(tabId, { 
+                        action: 'toggleComments', 
+                        hideComments: false
+                    });
+                    
+                    // Send motivation toggle
+                    chrome.tabs.sendMessage(tabId, { 
+                        action: 'toggleMotivation', 
+                        motivationEnabled: false
+                    });
+                    
+                    console.log('All feature toggle messages sent');
                 } else {
                     console.log('Error: No active tab found');
                 }
