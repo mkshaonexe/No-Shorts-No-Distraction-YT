@@ -34,12 +34,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // Timer functionality
     let startTime = Date.now();
     let isActive = true;
+    let countdownInterval = null;
+    let remainingSeconds = 600; // 10 minutes = 600 seconds
 
     function updateTimer() {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
         const minutes = Math.floor(elapsed / 60);
         const seconds = elapsed % 60;
         timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    function updateCountdownTimer() {
+        if (!isActive && remainingSeconds > 0) {
+            remainingSeconds--;
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            remainingTime.textContent = `Remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Auto turn ON when countdown completes
+            if (remainingSeconds === 0) {
+                console.log('Countdown completed! Auto-enabling extension...');
+                mainToggle.click(); // Auto-enable extension
+                remainingSeconds = 600; // Reset to 10 minutes
+            }
+        }
+    }
+
+    function startCountdown() {
+        if (countdownInterval) clearInterval(countdownInterval);
+        countdownInterval = setInterval(updateCountdownTimer, 1000);
+    }
+
+    function stopCountdown() {
+        if (countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+        remainingSeconds = 600; // Reset to 10 minutes
     }
 
     // Update timer every second
@@ -121,6 +153,11 @@ document.addEventListener('DOMContentLoaded', function() {
             subtitle.textContent = 'Tap To Turn Off';
             statusText.textContent = 'Blocked';
             statusText.className = 'blocked';
+            
+            // Hide timer and remaining time when extension is ON
+            timer.style.display = 'none';
+            remainingTime.style.display = 'none';
+            stopCountdown();
         } else {
             mainToggle.classList.remove('active');
             mainToggle.classList.add('inactive');
@@ -128,6 +165,16 @@ document.addEventListener('DOMContentLoaded', function() {
             subtitle.textContent = 'Tap To Turn On';
             statusText.textContent = 'Unblocked';
             statusText.className = 'unblocked';
+            
+            // Show timer and remaining time when extension is OFF
+            timer.style.display = 'block';
+            remainingTime.style.display = 'block';
+            remainingSeconds = 600; // Reset to 10 minutes
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            remainingTime.textContent = `Remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+            startCountdown();
         }
     }
 
