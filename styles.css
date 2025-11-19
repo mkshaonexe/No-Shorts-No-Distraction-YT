@@ -26,7 +26,7 @@ body.hide-shorts-enabled ytd-guide-entry-renderer[line-icon="shorts"]
 /* Styles active when .no-shorts-no-reels-enabled class is on body/html - Hide ALL recommendations */
 body.no-shorts-no-reels-enabled ytd-watch-next-secondary-results-renderer, /* Hide recommendations sidebar */
 body.no-shorts-no-reels-enabled #related, /* Hide "Up Next" and related videos sidebar */
-body.no-shorts-no-reels-enabled ytd-feed-filter-chip-bar-renderer, /* Hide the filter chips like "All", "Recents", etc. */
+body.no-shorts-no-reels-enabled ytd-browse[page-subtype="home"] ytd-feed-filter-chip-bar-renderer, /* Only hide filter chips on the home feed */
 body.no-shorts-no-reels-enabled ytd-compact-video-renderer /* Hide compact recommendations in sidebars */
 {
     display: none !important;
