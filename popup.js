@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Main toggle functionality
+    // Main toggle functionality - Master control for all features
     mainToggle.addEventListener('click', function() {
         isActive = !isActive;
         updateMainToggleState(isActive);
@@ -69,13 +69,39 @@ document.addEventListener('DOMContentLoaded', function() {
         // Sync with menu toggle
         toggleExtension.checked = isActive;
         
-        // Update extension state
-        chrome.storage.local.set({ enabled: isActive }, function() {
+        // When main toggle is OFF, turn OFF all menu features
+        if (!isActive) {
+            toggleShorts.checked = false;
+            toggleHideFeed.checked = false;
+            toggleComments.checked = false;
+            toggleMotivation.checked = false;
+        } else {
+            // When main toggle is ON, restore default settings
+            toggleExtension.checked = true;
+            toggleShorts.checked = true;  // Default: Block Shorts
+        }
+        
+        // Update all states in storage
+        chrome.storage.local.set({ 
+            enabled: isActive,
+            hideShorts: isActive ? true : false,  // Only active if main is ON
+            hideFeed: false,
+            hideComments: false,
+            motivationEnabled: false
+        }, function() {
             console.log('Main toggle changed:', isActive);
             // Notify content script
             chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                 if (tabs && tabs[0]) {
-                    chrome.tabs.sendMessage(tabs[0].id, { action: 'toggleExtension', enabled: isActive }, function(response) {
+                    // Send all toggle states to content script
+                    chrome.tabs.sendMessage(tabs[0].id, { 
+                        action: 'toggleExtension', 
+                        enabled: isActive,
+                        hideShorts: isActive ? true : false,
+                        hideFeed: false,
+                        hideComments: false,
+                        motivationEnabled: false
+                    }, function(response) {
                         if (chrome.runtime.lastError) {
                             console.log('Error sending main toggle message:', chrome.runtime.lastError);
                         }
@@ -105,16 +131,29 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Load initial states
-    chrome.storage.local.get(['enabled', 'hideComments', 'hideFeed', 'motivationEnabled', 'hideShorts'], function(result) {
+    // Load initial states with default values on first install
+    chrome.storage.local.get(['enabled', 'hideComments', 'hideFeed', 'motivationEnabled', 'hideShorts', 'initialized'], function(result) {
+        // Check if this is first install
+        if (!result.initialized) {
+            // Set default values on first install
+            chrome.storage.local.set({
+                enabled: true,
+                hideShorts: true,  // Default: Block Shorts
+                hideComments: false,
+                hideFeed: true, // Default: Hide Recommendations
+                motivationEnabled: false,
+                initialized: true
+            });
+        }
+
         // Main toggle state
         isActive = result.enabled !== false; // Default to true
         updateMainToggleState(isActive);
 
-        // Extension toggle state
+        // Extension toggle state (Hide Recommendations)
         toggleExtension.checked = result.enabled !== false; // Default to true
 
-        // Shorts toggle state
+        // Shorts toggle state (Block Shorts) - Default to true
         toggleShorts.checked = result.hideShorts !== false; // Default to true (hide shorts by default)
 
         // Hide Feed toggle state
