@@ -34,10 +34,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Timer functionality
+    /**
+     * Track when the extension was loaded for the elapsed timer.
+     * This variable stores the timestamp (in milliseconds) when the extension was loaded.
+     */
     let startTime = Date.now();
+    /**
+     * Main toggle state - true = extension ON (blocking), false = extension OFF.
+     * This variable controls the overall state of the extension.
+     */
     let isActive = true;
+    /**
+     * Interval reference for the countdown timer.
+     * This variable stores the ID of the interval used for the countdown timer.
+     */
     let countdownInterval = null;
-    let remainingSeconds = 600; // 10 minutes = 600 seconds
+    /**
+     * Countdown duration: 10 minutes = 600 seconds.
+     * This variable stores the remaining time (in seconds) for the countdown timer.
+     */
+    let remainingSeconds = 600;
 
     function updateTimer() {
         const elapsed = Math.floor((Date.now() - startTime) / 1000);
