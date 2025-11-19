@@ -333,6 +333,103 @@
             box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.3);
         }
 
+        .developer-unlock {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .developer-unlock:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .developer-chevron {
+            font-size: 14px;
+            color: #4ade80;
+            transition: transform 0.3s ease;
+        }
+
+        .developer-chevron.expanded {
+            transform: rotate(90deg);
+        }
+
+        .developer-options {
+            background: rgba(74, 222, 128, 0.05);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .dev-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #4ade80;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .dev-option {
+            margin-bottom: 15px;
+        }
+
+        .dev-label {
+            display: block;
+            font-size: 13px;
+            color: #a0a0a0;
+            margin-bottom: 8px;
+        }
+
+        .dev-input {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .dev-input:focus {
+            outline: none;
+            border-color: #4ade80;
+        }
+
+        .dev-save-btn {
+            width: 100%;
+            padding: 12px;
+            background: #4ade80;
+            border: none;
+            border-radius: 6px;
+            color: #1a1a1a;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dev-save-btn:hover {
+            background: #22c55e;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(74, 222, 128, 0.3);
+        }
+
+        .dev-save-btn:active {
+            transform: translateY(0);
+        }
+
         .footer {
             position: absolute;
             bottom: 20px;
@@ -419,7 +516,28 @@
                     <span class="mini-slider"></span>
                 </div>
             </li>
+            <li class="menu-item developer-unlock" id="developerUnlock">
+                <div class="menu-item-label">
+                    Developer
+                    <span class="beta" id="devLockStatus">🔒</span>
+                </div>
+                <div class="developer-chevron" id="devChevron" style="display: none;">▶</div>
+            </li>
         </ul>
+        
+        <!-- Developer Options Section -->
+        <div class="developer-options" id="developerOptions" style="display: none;">
+            <div class="dev-section-title">Developer Settings</div>
+            <div class="dev-option">
+                <label class="dev-label">Countdown Duration (minutes)</label>
+                <input type="number" id="countdownDuration" class="dev-input" min="1" max="60" value="10">
+            </div>
+            <div class="dev-option">
+                <label class="dev-label">Auto Turn-On After (minutes)</label>
+                <input type="number" id="autoTurnOnTime" class="dev-input" min="1" max="60" value="5">
+            </div>
+            <button class="dev-save-btn" id="devSaveBtn">Save Settings</button>
+        </div>
     </div>
 
     <div class="footer">

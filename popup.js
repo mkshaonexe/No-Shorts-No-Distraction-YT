@@ -21,6 +21,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggleMotivation = document.getElementById('toggleMotivation');
     const toggleComments = document.getElementById('toggleComments');
     
+    // Developer section elements
+    const developerUnlock = document.getElementById('developerUnlock');
+    const devLockStatus = document.getElementById('devLockStatus');
+    const devChevron = document.getElementById('devChevron');
+    const developerOptions = document.getElementById('developerOptions');
+    const countdownDurationInput = document.getElementById('countdownDuration');
+    const autoTurnOnTimeInput = document.getElementById('autoTurnOnTime');
+    const devSaveBtn = document.getElementById('devSaveBtn');
+    
     // Verify all elements are found
     console.log('✓ Popup Elements Initialized:', {
         mainToggle: !!mainToggle,
@@ -89,7 +98,11 @@ document.addEventListener('DOMContentLoaded', function() {
             clearInterval(countdownInterval);
             countdownInterval = null;
         }
-        remainingSeconds = 600; // Reset to 10 minutes
+        // Reset to saved countdown duration or default 10 minutes
+        chrome.storage.local.get(['countdownDuration'], function(result) {
+            const duration = result.countdownDuration || 10;
+            remainingSeconds = duration * 60;
+        });
     }
 
     // Update timer every second
@@ -109,6 +122,98 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target === menuOverlay) {
             menuOverlay.classList.remove('active');
         }
+    });
+
+    // Developer section unlock logic
+    let devClickCount = 0;
+    let devUnlocked = false;
+    let devOptionsVisible = false;
+    
+    // Load developer unlock state
+    chrome.storage.local.get(['devUnlocked'], function(result) {
+        if (result.devUnlocked) {
+            devUnlocked = true;
+            devLockStatus.textContent = '';
+            devChevron.style.display = 'block';
+        }
+    });
+    
+    // Load developer settings
+    chrome.storage.local.get(['countdownDuration', 'autoTurnOnTime'], function(result) {
+        if (result.countdownDuration) {
+            countdownDurationInput.value = result.countdownDuration;
+            remainingSeconds = result.countdownDuration * 60; // Convert to seconds
+        }
+        if (result.autoTurnOnTime) {
+            autoTurnOnTimeInput.value = result.autoTurnOnTime;
+        }
+    });
+    
+    // Developer unlock click handler - requires 7 clicks
+    developerUnlock.addEventListener('click', function() {
+        if (!devUnlocked) {
+            devClickCount++;
+            console.log(`Developer unlock click: ${devClickCount}/7`);
+            
+            if (devClickCount >= 7) {
+                devUnlocked = true;
+                devLockStatus.textContent = '';
+                devChevron.style.display = 'block';
+                chrome.storage.local.set({ devUnlocked: true });
+                console.log(' Developer mode unlocked!');
+                
+                // Show success feedback
+                devLockStatus.style.animation = 'pulse 0.5s ease';
+                setTimeout(() => {
+                    devLockStatus.style.animation = '';
+                }, 500);
+            }
+        } else {
+            // Toggle developer options visibility
+            devOptionsVisible = !devOptionsVisible;
+            if (devOptionsVisible) {
+                developerOptions.style.display = 'block';
+                devChevron.classList.add('expanded');
+            } else {
+                developerOptions.style.display = 'none';
+                devChevron.classList.remove('expanded');
+            }
+        }
+    });
+    
+    // Save developer settings
+    devSaveBtn.addEventListener('click', function() {
+        const countdownDuration = parseInt(countdownDurationInput.value) || 10;
+        const autoTurnOnTime = parseInt(autoTurnOnTimeInput.value) || 5;
+        
+        // Validate inputs
+        if (countdownDuration < 1 || countdownDuration > 60) {
+            alert('Countdown duration must be between 1 and 60 minutes');
+            return;
+        }
+        if (autoTurnOnTime < 1 || autoTurnOnTime > 60) {
+            alert('Auto turn-on time must be between 1 and 60 minutes');
+            return;
+        }
+        
+        // Save to storage
+        chrome.storage.local.set({ 
+            countdownDuration: countdownDuration,
+            autoTurnOnTime: autoTurnOnTime
+        }, function() {
+            console.log('Developer settings saved:', { countdownDuration, autoTurnOnTime });
+            
+            // Update current countdown duration
+            remainingSeconds = countdownDuration * 60;
+            
+            // Show success feedback
+            devSaveBtn.textContent = ' Saved!';
+            devSaveBtn.style.background = '#22c55e';
+            setTimeout(() => {
+                devSaveBtn.textContent = 'Save Settings';
+                devSaveBtn.style.background = '#4ade80';
+            }, 2000);
+        });
     });
 
     // Main toggle functionality - Master control for all features
@@ -217,14 +322,24 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Only reset countdown if not preserving it (i.e., when manually toggling)
             if (!preserveCountdown) {
-                remainingSeconds = 600; // Reset to 10 minutes
+                // Use custom countdown duration from developer settings
+                chrome.storage.local.get(['countdownDuration'], function(result) {
+                    const duration = result.countdownDuration || 10;
+                    remainingSeconds = duration * 60;
+                    
+                    const minutes = Math.floor(remainingSeconds / 60);
+                    const seconds = remainingSeconds % 60;
+                    timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    remainingTime.textContent = `Remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    startCountdown();
+                });
+            } else {
+                const minutes = Math.floor(remainingSeconds / 60);
+                const seconds = remainingSeconds % 60;
+                timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                remainingTime.textContent = `Remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+                startCountdown();
             }
-            
-            const minutes = Math.floor(remainingSeconds / 60);
-            const seconds = remainingSeconds % 60;
-            timer.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            remainingTime.textContent = `Remaining: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-            startCountdown();
         }
     }
 
