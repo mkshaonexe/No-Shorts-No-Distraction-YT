@@ -22,13 +22,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggleComments = document.getElementById('toggleComments');
     
     // Verify all elements are found
-    console.log('Elements found:', {
+    console.log('✓ Popup Elements Initialized:', {
         mainToggle: !!mainToggle,
         toggleExtension: !!toggleExtension,
         toggleShorts: !!toggleShorts,
         toggleHideFeed: !!toggleHideFeed,
         toggleComments: !!toggleComments,
-        toggleMotivation: !!toggleMotivation
+        toggleMotivation: !!toggleMotivation,
+        timer: !!timer,
+        remainingTime: !!remainingTime
     });
 
     // Timer functionality
