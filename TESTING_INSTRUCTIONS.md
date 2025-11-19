@@ -1,4 +1,4 @@
-# Testing Instructions - Toggle Fix v2
+# Testing Instructions - Complete Feature Update
 
 ## Issues Fixed
 1. Toggle switches in the menu were not clickable (checkbox inputs had zero width/height)
@@ -60,6 +60,56 @@ When clicking toggles, you should see messages like:
 - `Shorts toggle changed: false`
 - `Hide Feed toggle changed: true`
 - etc.
+
+## New Features Added
+
+### 1. Default Blocking Behavior
+- **On First Install**: Extension automatically enables:
+  - ✅ Block Shorts (enabled by default)
+  - ✅ Hide Recommendations (enabled by default)
+  - ❌ Hide Feed (disabled)
+  - ❌ Hide Comments (disabled)
+  - ❌ Motivation Mode (disabled)
+
+### 2. Master Toggle Control
+- **Main Button = Master Control**: The large circular button now controls ALL features
+- **When Main Toggle is OFF**:
+  - All menu features automatically turn OFF
+  - Status shows "Distraction is Unblocked"
+  - Button turns gray
+- **When Main Toggle is ON**:
+  - All menu features turn ON with defaults
+  - Status shows "Distraction is Blocked"
+  - Button turns green with pulse animation
+
+### 3. Updated Status Text
+- Changed from: "Scrolling is Blocked"
+- Changed to: "Distraction is Blocked"
+
+## Testing the New Features
+
+### Test 1: First Install Behavior
+1. Uninstall the extension completely
+2. Clear Chrome extension storage (chrome://extensions/ → Details → Clear data)
+3. Reinstall the extension
+4. **Expected**: Main button is ON, Block Shorts is ON, Hide Recommendations is ON
+
+### Test 2: Master Toggle Control
+1. Click the main circular button to turn OFF
+2. **Expected**: 
+   - Button turns gray
+   - Status shows "Distraction is Unblocked"
+   - All menu toggles turn OFF
+3. Click main button again to turn ON
+4. **Expected**:
+   - Button turns green
+   - Status shows "Distraction is Blocked"
+   - Block Shorts and Hide Recommendations are ON
+
+### Test 3: Menu Toggles Still Work
+1. Open the menu (☰ button)
+2. Try toggling individual features
+3. **Expected**: Each toggle works independently and sends messages to YouTube
 
 ## Note About Mojo Error
 The "Mojo is not defined" error you saw is unrelated to this extension - it's a Chrome internal error that can be safely ignored.
