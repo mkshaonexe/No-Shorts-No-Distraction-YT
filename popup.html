@@ -45,9 +45,19 @@
         }
 
         .timer {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 500;
-            color: #ffffff;
+            color: #4ade80;
+            background: rgba(74, 222, 128, 0.1);
+            padding: 4px 12px;
+            border-radius: 12px;
+            border: 1px solid #4ade80;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .add-btn {
@@ -318,8 +328,10 @@
 <body>
     <div class="header">
         <button class="menu-btn" id="menuBtn">☰</button>
-        <div class="timer" id="timer">0:00</div>
-        <button class="add-btn">+</button>
+        <div class="header-right">
+            <div class="timer" id="timer" style="display: none;">10:00</div>
+            <button class="add-btn">+</button>
+        </div>
     </div>
 
     <div class="main-content">
@@ -339,7 +351,7 @@
                 <span class="scrolling">Distraction is </span>
                 <span class="blocked" id="statusText">Blocked</span>
             </div>
-            <div class="remaining-time" id="remainingTime">Remaining today: 4:56</div>
+            <div class="remaining-time" id="remainingTime" style="display: none;">Remaining: 10:00</div>
         </div>
     </div>
 
